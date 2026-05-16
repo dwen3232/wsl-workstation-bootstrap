@@ -226,16 +226,20 @@ Write-Success "Windows sshd_config written and sshd restarted"
 # -- 8. Install Tailscale and authenticate -------------------------------------
 Write-Step "Installing Tailscale"
 
-$tsInstalled = winget list --id Tailscale.Tailscale 2>$null | Select-String "Tailscale"
-if ($tsInstalled) {
+$tailscaleExe = Join-Path $env:ProgramFiles "Tailscale\tailscale.exe"
+$tailscaleService = Get-Service -Name Tailscale -ErrorAction SilentlyContinue
+
+if ((Test-Path $tailscaleExe) -or $tailscaleService) {
     Write-Success "Tailscale already installed"
 } else {
     Write-Info "Installing via winget..."
     winget install `
         --id Tailscale.Tailscale `
+        --exact `
         --silent `
         --accept-package-agreements `
-        --accept-source-agreements
+        --accept-source-agreements `
+        --disable-interactivity
     Write-Success "Tailscale installed"
 }
 
